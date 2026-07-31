@@ -40,3 +40,79 @@ The stack includes:
 
 ---
 
+## Metrics
+## Components
+
+- Spring Boot Application
+- Node Exporter
+- VictoriaMetrics
+- Grafana
+
+### Flow
+
+<img width="800" height="300" alt="image" src="https://github.com/user-attachments/assets/6aecd702-27f4-4886-a73e-b4f344440c4c" />
+
+
+### Metrics Collected
+
+- CPU Usage
+- Memory Usage
+- Disk Usage
+- Filesystem Usage
+- Network Statistics
+- System Load
+
+---
+
+## Logs
+
+### Components
+
+- Spring Boot Application
+- Fluent Bit
+- Loki
+- Grafana
+
+### Flow
+
+<img width="800" height="400" alt="image" src="https://github.com/user-attachments/assets/cdf9e1e5-e885-4a5d-987f-6d24ed346a36" />
+
+### Logs Collected
+
+- Application Logs
+- Spring Boot Logs
+- Startup Logs
+- Runtime Logs
+- Java Exceptions
+
+---
+
+## Traces
+
+## Components
+
+- Spring Boot Application
+- OpenTelemetry Java Agent
+- OpenTelemetry Collector
+- Tempo
+- Grafana
+
+### Flow
+
+```text
+Spring Boot Application
+          │
+          ▼
+OpenTelemetry Java Agent
+          │
+          ▼
+OpenTelemetry Collector
+          │
+          ▼
+Tempo
+          │
+          ▼
+Grafana
+```
+
+---
