@@ -1,0 +1,384 @@
+Folder structure 
+
+sudo mkdir -p /opt/observability
+cd /opt/observability
+
+
+node exporter 
+
+sudo wget https://github.com/prometheus/node_exporter/releases/download/v1.12.1/node_exporter-1.12.1.linux-amd64.tar.gz
+sudo tar -xzf node_exporter-1.12.1.linux-amd64.tar.gz
+sudo mv node_exporter-1.12.1.linux-amd64 node_exporter
+
+Create the service file
+sudo nano /etc/systemd/system/node_exporter.service
+
+[Unit]
+Description=Node Exporter
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/opt/observability/node_exporter/node_exporter
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+
+---
+
+Victoriametrics 
+cd /opt/observability
+sudo wget https://github.com/VictoriaMetrics/VictoriaMetrics/releases/download/v1.148.0/victoria-metrics-linux-amd64-v1.148.0.tar.gz
+sudo tar -xzf victoria-metrics-linux-amd64-v1.148.0.tar.gz
+
+Step 3: Create Directory
+sudo mkdir -p /opt/observability/victoriametrics
+sudo mkdir -p /opt/observability/victoriametrics/data
+
+Step 4: Move Binary
+sudo mv victoria-metrics-prod /opt/observability/victoriametrics/
+
+Step 5: Create User
+sudo useradd -r -s /usr/sbin/nologin victoriametrics
+
+Step 6: Permissions
+sudo chown -R victoriametrics:victoriametrics /opt/observability/victoriametrics
+sudo chmod +x /opt/observability/victoriametrics/victoria-metrics-prod
+
+Step 7: Service file
+sudo nano /etc/systemd/system/victoriametrics.service
+
+[Unit]
+Description=VictoriaMetrics
+After=network.target
+
+[Service]
+User=victoriametrics
+Group=victoriametrics
+ExecStart=/opt/observability/victoriametrics/victoria-metrics-prod -storageDataPath=/opt/observability/victoriametrics/data
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+
+Step 8: Start Service
+sudo systemctl daemon-reload
+sudo systemctl enable victoriametrics
+sudo systemctl start victoriametrics
+
+Step 9: Verify
+curl http://localhost:8428
+
+
+Grafana 
+
+Step 1: Repository add karo
+sudo apt-get install -y apt-transport-https software-properties-common wget
+sudo mkdir -p /etc/apt/keyrings
+wget -q -O - https://apt.grafana.com/gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/grafana.gpg
+echo "deb [signed-by=/etc/apt/keyrings/grafana.gpg] https://apt.grafana.com stable main" | sudo tee /etc/apt/sources.list.d/grafana.list
+
+Step 2: Install Grafana
+sudo apt update
+sudo apt install grafana -y
+
+Step 3: Start Grafana
+sudo systemctl enable grafana-server
+sudo systemctl start grafana-server
+
+Step 4: Check Status
+sudo systemctl status grafana-server
+
+
+Loki
+
+Step 1: Create Directory
+sudo mkdir -p /opt/observability/loki
+cd /opt/observability/loki
+
+Step 2: Download Loki
+sudo wget https://github.com/grafana/loki/releases/latest/download/loki-linux-amd64.zip
+
+Step 3: Install unzip
+sudo apt update
+sudo apt install unzip -y
+
+Step 4: Extract
+sudo unzip loki-linux-amd64.zip
+
+Step 5: Rename Binary
+sudo mv loki-linux-amd64 loki
+sudo chmod +x loki
+
+Step 6: Verify
+ls -l
+
+Step 7: Create User
+sudo useradd -r -s /usr/sbin/nologin loki
+
+Step 8: Create Required Directories
+sudo mkdir -p /opt/observability/loki/data
+sudo mkdir -p /opt/observability/loki/rules
+
+Step 9: Permissions
+sudo chown -R loki:loki /opt/observability/loki
+
+Step 10: Config File
+sudo nano /opt/observability/loki/config.yaml
+
+auth_enabled: false
+
+server:
+  http_listen_port: 3100
+
+common:
+  path_prefix: /opt/observability/loki
+  replication_factor: 1
+
+  ring:
+    kvstore:
+      store: inmemory
+
+schema_config:
+  configs:
+    - from: 2024-01-01
+      store: tsdb
+      object_store: filesystem
+      schema: v13
+      index:
+        prefix: index_
+        period: 24h
+
+storage_config:
+  filesystem:
+    directory: /opt/observability/loki/data
+
+ingester:
+  wal:
+    enabled: true
+    dir: /opt/observability/loki/wal
+
+limits_config:
+  allow_structured_metadata: false
+
+compactor:
+  working_directory: /opt/observability/loki/compactor
+
+Step 11: Service File
+sudo nano /etc/systemd/system/loki.service
+
+
+[Unit]
+Description=Loki
+After=network.target
+
+[Service]
+User=loki
+Group=loki
+ExecStart=/opt/observability/loki/loki \
+-config.file=/opt/observability/loki/config.yaml
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+
+Step 12: reload
+sudo systemctl daemon-reload
+
+Step 13 Enable
+sudo systemctl enable loki
+
+Step 14: start
+sudo systemctl start loki
+
+Step 15: check 
+sudo systemctl status loki
+
+
+Fluentbit
+
+Step 1: Add Repository
+curl https://raw.githubusercontent.com/fluent/fluent-bit/master/install.sh | sudo bash
+
+Step 2: Update Packages
+sudo apt update
+
+Step 3: Install Fluent Bit
+sudo apt install fluent-bit -y
+
+Step 4: Verify Installation
+fluent-bit --version
+
+Step 5: Start Service
+sudo systemctl enable fluent-bit
+sudo systemctl start fluent-bit
+
+Step 6: Check Status
+sudo systemctl status fluent-bit
+
+
+
+for installing tempo 
+
+cd /opt
+sudo mkdir -p /opt/observability/tempo
+cd /opt/observability/tempo
+sudo wget https://github.com/grafana/tempo/releases/download/v2.9.1/tempo_2.9.1_linux_amd64.tar.gz
+sudo tar -xzf tempo_2.9.1_linux_amd64.tar.gz
+sudo chmod +x tempo
+sudo nano /opt/observability/tempo/tempo.yaml
+
+server:
+  http_listen_port: 3200
+  grpc_listen_port: 9096
+
+distributor:
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: 0.0.0.0:4319
+        http:
+          endpoint: 0.0.0.0:4320
+
+storage:
+  trace:
+    backend: local
+    local:
+      path: /opt/observability/tempo/data
+    wal:
+      path: /opt/observability/tempo/wal
+
+compactor:
+  compaction:
+    block_retention: 24h
+	
+tempo.service
+[Unit]
+Description=Grafana Tempo
+After=network.target
+
+[Service]
+User=ubuntu
+ExecStart=/opt/observability/tempo/tempo -config.file=/opt/observability/tempo/tempo.yaml
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+
+next step : Create Directories
+mkdir -p /opt/observability/tempo/data
+mkdir -p /opt/observability/tempo/wal
+
+sudo chown -R ubuntu:ubuntu /opt/observability/tempo
+sudo chmod -R 755 /opt/observability/tempo
+
+sudo systemctl daemon-reload
+sudo systemctl restart tempo
+sudo systemctl status tempo
+
+otel 
+wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.157.0/otelcol-contrib_0.157.0_linux_amd64.tar.gz
+tar -xzf otelcol-contrib_0.157.0_linux_amd64.tar.gz
+chmod +x otelcol-contrib
+vi /opt/observability/otel/config.yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+
+processors:
+  batch:
+
+
+exporters:
+  otlp:
+    endpoint: localhost:4319
+    tls:
+      insecure: true
+
+  debug:
+    verbosity: normal
+
+
+extensions:
+  health_check:
+
+
+service:
+  extensions:
+    - health_check
+
+  pipelines:
+    traces:
+      receivers:
+        - otlp
+      processors:
+        - batch
+      exporters:
+        - otlp
+        - debug
+
+sudo vi /etc/systemd/system/otel.service
+[Unit]
+Description=OpenTelemetry Collector
+After=network.target
+
+[Service]
+User=ubuntu
+WorkingDirectory=/opt/observability/otel
+ExecStart=/opt/observability/otel/otelcol-contrib --config=/opt/observability/otel/config.yaml
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+
+
+sudo systemctl daemon-reload
+sudo systemctl enable otel
+sudo systemctl start otel
+sudo systemctl status otel
+
+java agent
+sudo mkdir -p /opt/observability/java-agent
+cd /opt/observability/java-agent
+java -javaagent:/opt/observability/java-agent/opentelemetry-javaagent.jar -Dserver.port=8081 -Dotel.service.name=ecommerce-app -Dotel.exporter.otlp.endpoint=http://localhost:4317 -Dotel.exporter.otlp.protocol=grpc -Dotel.traces.exporter=otlp -Dotel.metrics.exporter=none -Dotel.logs.exporter=none -jar /home/ubuntu/e-com-java/target/JtSpringProject-0.0.1-SNAPSHOT.jar
+
+
+For connectivity 
+sudo nano /opt/observability/victoriametrics/prometheus.yml
+
+prometheus.yml
+
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: "node_exporter"
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - "65.2.48.73:9100"
+
+
+/etc/systemd/system/victoriametrics.service
+[Unit]
+Description=VictoriaMetrics
+After=network.target
+
+[Service]
+User=victoriametrics
+Group=victoriametrics
+ExecStart=/opt/observability/victoriametrics/victoria-metrics-prod \
+-storageDataPath=/opt/observability/victoriametrics/data \
+-promscrape.config=/opt/observability/victoriametrics/prometheus.yml
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
