@@ -335,9 +335,9 @@ Configured the following Data Sources:
 
 Grafana provides a unified interface for observing system metrics, application logs, and distributed traces.
 
-<img width="1400" height="576" alt="Screenshot 2026-08-01 175504" src="https://github.com/user-attachments/assets/5a53f609-0136-4dfa-92f2-4be1b88e7e7b" />
+<img width="1500" height="576" alt="Screenshot 2026-08-01 175504" src="https://github.com/user-attachments/assets/5a53f609-0136-4dfa-92f2-4be1b88e7e7b" />
 
-<img width="1400" height="700" alt="Screenshot 2026-08-01 175523" src="https://github.com/user-attachments/assets/7bfac88d-d2c5-442c-9874-33d550f550da" />
+<img width="1500" height="700" alt="Screenshot 2026-08-01 175523" src="https://github.com/user-attachments/assets/7bfac88d-d2c5-442c-9874-33d550f550da" />
 
 ---                                           
 
