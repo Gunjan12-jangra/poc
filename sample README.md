@@ -145,8 +145,72 @@ The Java Agent automatically generated:
 - Distributed Trace Context
 
 ---
+## Tempo:
+### Installation:
+#### Step 1: Create the Installation Directory
 
-## Tempo Configuration
+```bash
+sudo mkdir -p /opt/observability/tempo
+cd /opt/observability/tempo
+```
+
+---
+
+#### Step 2: Download Tempo
+
+```bash
+sudo wget https://github.com/grafana/tempo/releases/download/v2.9.1/tempo_2.9.1_linux_amd64.tar.gz
+```
+
+---
+
+#### Step 3: Extract the Archive
+
+```bash
+sudo tar -xzf tempo_2.9.1_linux_amd64.tar.gz
+```
+
+---
+
+#### Step 4: Make the Binary Executable
+
+```bash
+sudo chmod +x tempo
+```
+
+---
+
+#### Step 5: Create Storage Directories
+
+```bash
+sudo mkdir -p /opt/observability/tempo/data
+sudo mkdir -p /opt/observability/tempo/wal
+```
+
+---
+
+#### Step 6: Set Permissions
+
+```bash
+sudo chown -R ubuntu:ubuntu /opt/observability/tempo
+sudo chmod -R 755 /opt/observability/tempo
+```
+
+---
+
+#### Step 7: Reload, Start, and Verify the Tempo Service
+
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl restart tempo
+sudo systemctl enable tempo
+sudo systemctl status tempo
+```
+
+---
+
+### Configuration:
 
 Tempo was configured with:
 
@@ -157,7 +221,7 @@ Tempo was configured with:
 - gRPC API
 - Trace Retention
 
-### tempo.yaml
+#### tempo.yaml
 
 ```bash
 server:
@@ -187,7 +251,44 @@ compactor:
 ```
 ---
 
-## Fluent Bit Configuration
+## Fluent Bit 
+### Installation
+
+#### Step 1: Add the Fluent Bit Repository
+
+```bash
+curl https://raw.githubusercontent.com/fluent/fluent-bit/master/install.sh | sudo bash
+```
+
+---
+
+#### Step 2: Install Fluent Bit
+
+```bash
+sudo apt update
+sudo apt install fluent-bit -y
+```
+
+---
+
+#### Step 3: Verify the Installation
+
+```bash
+fluent-bit --version
+```
+
+---
+
+#### Step 4: Start and Verify the Fluent Bit Service
+
+```bash
+sudo systemctl enable fluent-bit
+sudo systemctl start fluent-bit
+sudo systemctl status fluent-bit
+```
+---
+
+### Configuration
 
 Configured Fluent Bit to:
 
@@ -198,7 +299,7 @@ Configured Fluent Bit to:
 - Retry failed transmissions
 - Forward logs to Loki
 
-### fluent-bit.conf
+#### fluent-bit.conf
 
 ```bash
 [SERVICE]
@@ -298,7 +399,63 @@ Configured Fluent Bit to:
 
 ---
 
-## VictoriaMetrics Configuration
+## VictoriaMetrics 
+### Installation
+
+#### Step 1: Download and Extract VictoriaMetrics
+
+```bash
+cd /opt/observability
+
+sudo wget https://github.com/VictoriaMetrics/VictoriaMetrics/releases/download/v1.148.0/victoria-metrics-linux-amd64-v1.148.0.tar.gz
+
+sudo tar -xzf victoria-metrics-linux-amd64-v1.148.0.tar.gz
+```
+
+---
+
+#### Step 2: Create Required Directories
+
+```bash
+sudo mkdir -p /opt/observability/victoriametrics
+sudo mkdir -p /opt/observability/victoriametrics/data
+```
+
+---
+
+#### Step 3: Move the Binary
+
+```bash
+sudo mv victoria-metrics-prod /opt/observability/victoriametrics/
+```
+
+---
+
+#### Step 4: Create the VictoriaMetrics User
+
+```bash
+sudo useradd -r -s /usr/sbin/nologin victoriametrics
+```
+
+---
+
+#### Step 5: Set Permissions
+
+```bash
+sudo chown -R victoriametrics:victoriametrics /opt/observability/victoriametrics
+sudo chmod +x /opt/observability/victoriametrics/victoria-metrics-prod
+```
+---
+#### Step 6: Reload, Start, and Enable the VictoriaMetrics Service
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable victoriametrics
+sudo systemctl start victoriametrics
+```
+---
+
+### Configuration
 
 Configured VictoriaMetrics to:
 
@@ -307,7 +464,7 @@ Configured VictoriaMetrics to:
 - Retain historical metric data
 - Serve Grafana dashboards
 
-### prometheus.yml
+#### prometheus.yml
 
 ```bash
 global:
@@ -323,7 +480,42 @@ scrape_configs:
 
 ---
 
-## Grafana Configuration
+## Grafana 
+### Installation
+
+#### Step 1: Add the Grafana Repository
+
+```bash
+sudo apt-get install -y apt-transport-https software-properties-common wget
+
+sudo mkdir -p /etc/apt/keyrings
+
+wget -q -O - https://apt.grafana.com/gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/grafana.gpg
+
+echo "deb [signed-by=/etc/apt/keyrings/grafana.gpg] https://apt.grafana.com stable main" | sudo tee /etc/apt/sources.list.d/grafana.list
+```
+
+---
+
+#### Step 2: Install Grafana
+
+```bash
+sudo apt update
+sudo apt install grafana -y
+```
+
+---
+
+#### Step 3: Start and Verify the Grafana Service
+
+```bash
+sudo systemctl enable grafana-server
+sudo systemctl start grafana-server
+sudo systemctl status grafana-server
+```
+---
+
+### Configuration
 
 Configured the following Data Sources:
 
