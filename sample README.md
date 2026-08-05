@@ -399,6 +399,121 @@ Configured Fluent Bit to:
 
 ---
 
+## Loki
+### Installation
+#### Step 1: Create the Installation Directory
+
+```bash
+sudo mkdir -p /opt/observability/loki
+cd /opt/observability/loki
+```
+
+---
+
+#### Step 2: Download Loki
+
+```bash
+sudo wget https://github.com/grafana/loki/releases/latest/download/loki-linux-amd64.zip
+```
+
+---
+
+#### Step 3: Install and Extract Loki
+
+```bash
+sudo apt update
+sudo apt install unzip -y
+sudo unzip loki-linux-amd64.zip
+```
+
+---
+
+#### Step 4: Rename the Binary
+
+```bash
+sudo mv loki-linux-amd64 loki
+sudo chmod +x loki
+```
+
+---
+
+#### Step 5: Create the Loki User
+
+```bash
+sudo useradd -r -s /usr/sbin/nologin loki
+```
+
+---
+
+#### Step 6: Create Required Directories
+
+```bash
+sudo mkdir -p /opt/observability/loki/data
+sudo mkdir -p /opt/observability/loki/rules
+```
+
+---
+
+#### Step 7: Set Permissions
+
+```bash
+sudo chown -R loki:loki /opt/observability/loki
+```
+---
+
+#### Step 8: Reload, Start, and Verify the Loki Service
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable loki
+sudo systemctl start loki
+sudo systemctl status loki
+```
+---
+
+### Configuration
+
+```yaml
+auth_enabled: false
+
+server:
+  http_listen_port: 3100
+
+common:
+  path_prefix: /opt/observability/loki
+  replication_factor: 1
+
+  ring:
+    kvstore:
+      store: inmemory
+
+schema_config:
+  configs:
+    - from: 2024-01-01
+      store: tsdb
+      object_store: filesystem
+      schema: v13
+      index:
+        prefix: index_
+        period: 24h
+
+storage_config:
+  filesystem:
+    directory: /opt/observability/loki/data
+
+ingester:
+  wal:
+    enabled: true
+    dir: /opt/observability/loki/wal
+
+limits_config:
+  allow_structured_metadata: false
+
+compactor:
+  working_directory: /opt/observability/loki/compactor
+```
+---
+
 ## VictoriaMetrics 
 ### Installation
 
