@@ -593,6 +593,29 @@ compactor:
 ```
 ---
 
+## Node Exporter
+### Installation
+
+#### Step 1: Download Node Exporter
+
+```bash
+sudo wget https://github.com/prometheus/node_exporter/releases/download/v1.12.1/node_exporter-1.12.1.linux-amd64.tar.gz
+```
+
+#### Step 2: Extract the Archive
+
+```bash
+sudo tar -xzf node_exporter-1.12.1.linux-amd64.tar.gz
+```
+
+#### Step 3: Rename the Directory
+
+```bash
+sudo mv node_exporter-1.12.1.linux-amd64 node_exporter
+```
+
+---
+
 ## VictoriaMetrics 
 ### Installation
 
