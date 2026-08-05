@@ -251,6 +251,85 @@ compactor:
 ```
 ---
 
+## OpenTelemetry Collector 
+### Installation
+
+#### Step 1: Download the OpenTelemetry Collector
+
+```bash
+wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.157.0/otelcol-contrib_0.157.0_linux_amd64.tar.gz
+```
+
+---
+
+#### Step 2: Extract the Archive
+
+```bash
+tar -xzf otelcol-contrib_0.157.0_linux_amd64.tar.gz
+```
+
+---
+
+#### Step 3: Make the Binary Executable
+
+```bash
+chmod +x otelcol-contrib
+```
+
+---
+
+#### Step 4: Reload, Start, and Verify the Service
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable otel
+sudo systemctl start otel
+sudo systemctl status otel
+```
+
+### Configuration
+
+```yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch:
+
+exporters:
+  otlp:
+    endpoint: localhost:4319
+    tls:
+      insecure: true
+
+  debug:
+    verbosity: normal
+
+extensions:
+  health_check:
+
+service:
+  extensions:
+    - health_check
+
+  pipelines:
+    traces:
+      receivers:
+        - otlp
+      processors:
+        - batch
+      exporters:
+        - otlp
+        - debug
+```
+
+---
+
 ## Fluent Bit 
 ### Installation
 
